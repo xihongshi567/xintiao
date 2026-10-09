@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>薪跳 · 今日已赚</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E%F0%9F%8D%85%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- 桌面背景（纯装饰，暖白 + 番茄色柔光） -->
+  <div class="bg" aria-hidden="true"></div>
+
+  <!-- ============ 薪跳小组件（可拖拽） ============ -->
+  <div class="widget" id="widget">
+    <!-- 悬浮胶囊（收起态） -->
+    <div class="pill" id="pill" role="button" aria-label="展开薪跳小组件" tabindex="0">
+      <span class="pill__avatar-wrap">
+        <span class="pill__avatar" id="pillAvatar"></span>
+        <span class="pill__status" id="pillStatus" aria-hidden="true">+</span>
+      </span>
+      <div class="pill__info">
+        <span class="pill__label">📅 今日已赚</span>
+        <span class="pill__money money" id="pillMoney" aria-label="今日已赚金额"></span>
+      </div>
+    </div>
+
+    <!-- 完整组件面板（展开态） -->
+    <section class="panel" id="panel" aria-label="薪跳小组件">
+      <!-- 个人信息区域 -->
+      <header class="panel__header" id="panelHeader">
+        <div class="avatar-wrap" id="avatarWrap">
+          <span class="avatar" id="panelAvatar"></span>
+          <button class="avatar__status" id="statusBtn" type="button" aria-label="选择今日状态">+</button>
+          <!-- 状态选择浮层（非模态，从头像下方冒出） -->
+          <div class="status-pop" id="statusPop" role="menu" hidden></div>
+        </div>
+        <div class="header__text">
+          <h1 class="header__title" id="mottoText"></h1>
+          <p class="header__date" id="dateText"></p>
+        </div>
+        <div class="header__actions">
+          <button class="icon-btn" id="settingsBtn" type="button" aria-label="设置">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </button>
+          <button class="icon-btn" id="collapseBtn" type="button" aria-label="收起为胶囊">−</button>
+        </div>
+      </header>
+
+      <!-- 薪资进度区域 -->
+      <div class="card salary-card">
+        <div class="card__label">📅 今日已赚</div>
+        <div class="money money--big" id="panelMoney" aria-label="今日已赚金额"></div>
+        <div class="progress" aria-hidden="true"><div class="progress__fill" id="progressFill"></div></div>
+        <div class="salary-card__foot">
+          <span class="salary-card__percent" id="percentText">0%</span>
+          <span class="salary-card__hint" id="hintText"></span>
+        </div>
+      </div>
+
+      <!-- 节假日倒计时区域（可在设置中关闭） -->
+      <div class="card holiday-card" id="holidayCard">
+        <span class="holiday-card__icon" aria-hidden="true">🎉</span>
+        <div class="holiday-card__body">
+          <div class="holiday-card__title">节假日</div>
+          <div class="holiday-card__value" id="holidayText"></div>
+        </div>
+      </div>
+
+      <!-- 待办任务列表（TODO） -->
+      <div class="card tasks-card">
+        <div class="tasks-card__head">
+          <h2 class="tasks-card__title">TODO</h2>
+          <button class="add-btn" id="todoAdd" type="button" aria-label="添加待办">+</button>
+        </div>
+        <ul class="task-list" id="todoList"></ul>
+      </div>
+
+      <!-- 已完成任务列表（DONE） -->
+      <div class="card tasks-card">
+        <div class="tasks-card__head">
+          <h2 class="tasks-card__title">DONE</h2>
+          <button class="add-btn" id="doneAdd" type="button" aria-label="添加已完成任务">+</button>
+        </div>
+        <ul class="task-list" id="doneList"></ul>
+      </div>
+    </section>
+  </div>
+
+  <!-- 番茄红胶囊 Toast（上下班提醒） -->
+  <div class="toast" id="toast" role="status" hidden></div>
+
+  <!-- ============ 设置弹窗 ============ -->
+  <div class="overlay" id="settingsOverlay" hidden>
+    <div class="dialog" role="dialog" aria-modal="true" aria-label="设置">
+      <h2 class="dialog__title">设置</h2>
+      <div class="dialog__error" id="dialogError" hidden></div>
+
+      <div class="dialog__section">
+        <p class="dialog__label">头像风格</p>
+        <div class="avatar-grid" id="avatarGrid"></div>
+      </div>
+
+      <div class="dialog__section">
+        <p class="dialog__label">今日日薪（元）</p>
+        <input class="input" type="number" id="incomeInput" min="1" step="0.01" placeholder="如 300">
+      </div>
+
+      <div class="dialog__section">
+        <p class="dialog__label">工作时间</p>
+        <div class="time-grid">
+          <label class="time-field">上班<input class="input input--time" type="time" id="workStartInput"></label>
+          <label class="time-field">下班<input class="input input--time" type="time" id="workEndInput"></label>
+        </div>
+      </div>
+
+      <div class="dialog__section">
+        <p class="dialog__label">午休时间</p>
+        <div class="time-grid">
+          <label class="time-field">开始<input class="input input--time" type="time" id="lunchStartInput"></label>
+          <label class="time-field">结束<input class="input input--time" type="time" id="lunchEndInput"></label>
+        </div>
+      </div>
+
+      <div class="dialog__section">
+        <p class="dialog__label">头部语录</p>
+        <input class="input" type="text" id="mottoInput" maxlength="30" placeholder="一句话，最多 30 字">
+        <label class="switch-row">
+          <span>随机语录（打开后每次刷新随机一条）</span>
+          <input class="switch" type="checkbox" id="mottoRandomSwitch">
+          <span class="switch__track" aria-hidden="true"><span class="switch__thumb"></span></span>
+        </label>
+      </div>
+
+      <div class="dialog__section">
+        <p class="dialog__label">模块开关</p>
+        <label class="switch-row">
+          <span>节假日倒计时</span>
+          <input class="switch" type="checkbox" id="holidaySwitch">
+          <span class="switch__track" aria-hidden="true"><span class="switch__thumb"></span></span>
+        </label>
+      </div>
+
+      <div class="dialog__section" id="autostartSection" hidden>
+        <p class="dialog__label">桌面组件</p>
+        <label class="switch-row">
+          <span>开机自启</span>
+          <input class="switch" type="checkbox" id="autostartSwitch">
+          <span class="switch__track" aria-hidden="true"><span class="switch__thumb"></span></span>
+        </label>
+      </div>
+
+      <div class="dialog__actions">
+        <button class="btn btn--ghost" id="settingsCancel" type="button">取消</button>
+        <button class="btn btn--primary" id="settingsSave" type="button">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

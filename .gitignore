@@ -1,0 +1,12 @@
+# 构建产物
+src-tauri/target/
+
+# IDE / 编辑器
+.idea/
+.cache/
+*.iml
+
+# 系统文件
+Thumbs.db
+Desktop.ini
+.DS_Store
